@@ -1,0 +1,94 @@
+---
+title: "Ordinal Regression"
+author: Riley Harper
+date: "`r Sys.Date()`"
+output:
+  pagedown::html_resume:
+    # set it to true for a self-contained HTML page but it'll take longer to render
+    self_contained: false
+# uncomment this line to produce HTML and PDF in RStudio:
+#knit: pagedown::chrome_print
+---
+```{r}
+options(repos = c(CRAN = "https://cloud.r-project.org/"))
+# Load necessary libraries
+
+if (!require(MASS)) {install.packages("MASS"); library(MASS)} # For ordinal regression
+if (!require(caret)) {install.packages("caret"); library(caret)} # For data splitting
+if (!require(dummies)) {install.packages("dummies"); library(dummies)} # For one-hot encoding
+if (!require(here)) {install.packages("here"); library(here)}
+if (!require(ggplot)) {install.packages("ggplot"); library(ggplot)}
+setwd(paste0(here(), "/Ordinal-Model"))
+
+# Load the data
+data <- read.csv("customer_filtered.csv") # Update this with the actual path to your CSV file
+data <- data[-1]
+plot <- ggplot(data, aes(x=factor(Participants))) + 
+            geom_bar(fill="skyblue", color="black") + 
+            labs(title="Number of Participants Distribution", x="Number of Participants", y="Frequency") +
+            theme_minimal()
+data$Method <- as.factor(data$Method)
+set.seed(123) # For reproducibility
+trainIndex <- createDataPartition(data$Participants, p = 0.8, list = FALSE)
+trainData <- data[trainIndex, ]
+testData <- data[-trainIndex, ]
+trainData$Participants <- factor(trainData$Participants, 
+                                 levels = c("1", "2", "3", "4", "5", "6", "7", "8"), 
+                                 ordered = TRUE)
+testData$Participants <- factor(testData$Participants, 
+                                levels = c("1", "2", "3", "4", "5", "6", "7", "8"), 
+                                ordered = TRUE)
+
+mod <- polr(Participants ~ Method, data = trainData, Hess=TRUE)
+summary(mod)
+
+mod2 <- glm(Private.event ~ Method, data = trainData, family = binomial)
+summary(mod2)
+
+# Predicting with the ordinal regression model
+predictedParticipants <- predict(mod, newdata = testData, type = "class")
+
+# Predicting probabilities for private event booking
+predictedPrivateEventProb <- predict(mod2, newdata = testData, type = "response")
+# Converting probabilities to binary outcome
+predictedPrivateEventBinary <- ifelse(predictedPrivateEventProb > 0.5, 1, 0)
+
+# Confusion Matrix for ordinal regression predictions
+print(table(Predicted = predictedParticipants, Actual = testData$Participants))
+
+print(table(Predicted = predictedPrivateEventBinary, Actual = testData$Private.event))
+```
+
+```{r}
+if (!require(VGAM)) {install.packages("VGAM"); library(VGAM)}
+trainData$Participants <- factor(trainData$Participants, ordered = TRUE)
+trainData$Method <- as.factor(trainData$Method)
+testData$Participants <- factor(testData$Participants, ordered = TRUE)
+testData$Method <- as.factor(testData$Method)
+
+vglmModel <- vglm(Participants ~ Method, family = cumulative(link = "logit", parallel = TRUE), data = trainData)
+summary(vglmModel)
+
+predictedParticipantsVglm <- predict(vglmModel, newdata = testData, type = "response")
+maxProbClass <- apply(predictedParticipantsVglm, 1, which.max)
+predictedClasses <- levels(testData$Participants)[maxProbClass]
+table(Predicted = predictedClasses, Actual = testData$Participants)
+```
+
+```{r}
+if (!require(ROSE)) {install.packages("ROSE"); library(ROSE)}
+if (!require(DMwR)) {install.packages("DMwR"); library(DMwR)}
+if (!require(pROC)) {install.packages("pROC"); library(pROC)}
+trainData_oversampled <- ovun.sample(Participants ~ ., data = trainData, method = "over", N = max(table(trainData$Participants)) * length(unique(trainData$Participants)))$data
+trainData_SMOTE <- SMOTE(Participants ~ ., data = trainData, perc.over = 100, k = 5)
+case_weights <- ifelse(trainData$Participants == "minority_class", 10, 1) # Example weights
+mod2_weighted <- glm(Private.event ~ Method, data = trainData, family = binomial, weights = case_weights)
+predictedPrivateEventProb <- predict(mod2_weighted, newdata = testData, type = "response")
+predictedPrivateEventBinary <- ifelse(predictedPrivateEventProb > 0.5, 1, 0)
+# Calculating AUC and plotting ROC curve
+roc_curve <- roc(response = testData$Private.event, predictor = as.numeric(predictedPrivateEventBinary))
+png(filename = "AUC.png", width = 800, height = 600)
+plot(roc_curve, main="ROC Curve")
+dev.off()
+print(paste("AUC:", auc_value))
+```

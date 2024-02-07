@@ -1,7 +1,5 @@
-#Rishabh Singh
 #Chapel Thrill Escapes
 #Ordinal Logistic Regression Model for Customer CTE Data
-rm(list =ls()) #Cleans our environment 
 
 #Installs the necessary packages 
 if (!require(VGAM)) {install.packages("VGAM"); library(VGAM)} #Can fit a diverse type of ordered-logit regression models depending on nature of dataset and mathematical relationship
@@ -14,13 +12,15 @@ if (!require(officer)) {install.packages("officer"); library(officer)}
 if (!require(sf)) {install.packages("sf"); library(sf)}
 if (!require(gofcat)) {install.packages("gofcat"); library(gofcat)} #Allows for the use of the "LR.Test" function
 
-customer_filtered1 <- read.csv("./customer_filtered1.csv") #Imports our "customer_filtered1"
-#dataset
-#
+setwd(paste0(here(), "/Ordinal-Model"))
+data <- read.csv("./customer_filtered1.csv") #Imports our "customer_filtered1"
+data <- data[,-1]
+write.csv(data, file = "./customer_filtered.csv")
+
 #Representations our input variables as a matrix and our output variable (or response variable) as an ordered variable for our data to
 #properly be fit into the "vglm" function for creating our non-proportional odds model. 
-output <- ordered(customer_filtered1$Participants) 
-input <- as.matrix(customer_filtered1$Method, customer_filtered1$On.Campus.Student, customer_filtered1$Private.event) 
+output <- ordered(data$Participants) 
+input <- as.matrix(data$Method, data$On.Campus.Student, data$Private.event) 
 #
 #Testing the Proportional Odds Assumption to test for the Applicability of our Model. 
 ordinal_log_po <- vglm(output ~ input, family = cumulative(parallel = TRUE), data = customer_filtered1) #Ordered Logistic Regression Model WITH proportional odds (our NULL
