@@ -16,8 +16,6 @@ To use this project, follow these steps:
 
 git clone https://github.com/Chapel-Thrill-Escapes/Ordinal-Model.git
 
-2. Install dependencies:
-
 ## Usage
 
 To predict customer booking sizes based on marketing methods, follow these steps:
