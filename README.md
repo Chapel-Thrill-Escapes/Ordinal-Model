@@ -14,7 +14,7 @@ To use this project, follow these steps:
 
 1. Clone the repository:
 
-git clone https://github.com/username/repository.git
+git clone [https://github.com/username/repository.git](https://github.com/Chapel-Thrill-Escapes/Ordinal-Model.git)
 
 2. Install dependencies:
 
