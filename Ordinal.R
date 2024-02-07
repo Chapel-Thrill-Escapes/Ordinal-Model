@@ -1,16 +1,20 @@
 #Rishabh Singh
 #Chapel Thrill Escapes
 #Ordinal Logistic Regression Model for Customer CTE Data
-#
 rm(list =ls()) #Cleans our environment 
-#
+
 #Installs the necessary packages 
 if (!require(VGAM)) {install.packages("VGAM"); library(VGAM)} #Can fit a diverse type of ordered-logit regression models depending on nature of dataset and mathematical relationship
 #between response variable and covariates: with proportional odds, semi-proportional odds, non-proportional odds. 
 #model. 
+options(timeout=120)
+if (!require(fontLiberation)) {install.packages("fontLiberation"); library(fontLiberation)}
+if (!require(here)) {install.packages("here"); library(here)}
+if (!require(officer)) {install.packages("officer"); library(officer)}
+if (!require(sf)) {install.packages("sf"); library(sf)}
 if (!require(gofcat)) {install.packages("gofcat"); library(gofcat)} #Allows for the use of the "LR.Test" function
-#
-customer_filtered1 <- read.csv("/Users/rishisingh/Chapel\ Thrill\ Escapes\ /customer_filtered1.csv") #Imports our "customer_filtered1"
+
+customer_filtered1 <- read.csv("./customer_filtered1.csv") #Imports our "customer_filtered1"
 #dataset
 #
 #Representations our input variables as a matrix and our output variable (or response variable) as an ordered variable for our data to
