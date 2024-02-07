@@ -2,14 +2,6 @@
 
 This project aims to predict customer booking sizes based on the marketing method used to reach them. By analyzing historical data on customer bookings and the marketing methods employed, the goal is to identify the most effective marketing channels for maximizing booking sizes.
 
-## Table of Contents
-
-- [Introduction](#introduction)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Contributing](#contributing)
-- [License](#license)
-
 ## Introduction
 
 Customer booking size is a critical metric for businesses in various industries, including hospitality, events, and entertainment. Understanding how different marketing methods influence booking sizes can help businesses allocate resources more effectively and optimize their marketing strategies.
